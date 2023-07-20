@@ -16,11 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 # from django.urls import include
-from django.conf.urls import url, include
+import django
+if (django.VERSION[0] > 3):
+  from django.urls import url, re_path
+else:
+  from django.conf.urls import url, include
 
 # urlpatterns = [path('admin/', admin.site.urls),]
 # urlpatterns = patterns('ask.qa')
-urlpatterns = [
-  # re_path('admin/', admin.site.urls),
-  url('', include('qa.urls')),
-]
+if (django.VERSION[0] > 3):
+  urlpatterns = [re_path('', include('qa.urls')),]
+else:
+  urlpatterns = [url('', include('qa.urls')),]
