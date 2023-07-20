@@ -1,12 +1,13 @@
 from qa.views import application
-from django.urls import re_path, include
+from django.conf.urls import url, include
+# from django.urls import include
 
 urlpatterns = [
-	re_path(r'^$', application, name='main'),
-	re_path(r'^login\/$', application, name='login'),
-        re_path(r'^signup/$', application, name='signup'),
-        re_path(r'^ask/$', application, name='ask'),
-        re_path(r'^popular/$', application, name='popular'),
-        re_path(r'^new/$', application, name='new'),
-	re_path(r'^question/(\d+)/$', application, name='question')
+	url(r'^$', application, name='main'),
+	url(r'^login\/$', application, name='login'),
+        url(r'^signup/$', application, name='signup'),
+        url(r'^ask/$', application, name='ask'),
+        url(r'^popular/$', application, name='popular'),
+        url(r'^new/$', application, name='new'),
+	url(r'^question/(\d+)/$', application, name='question')
 ]

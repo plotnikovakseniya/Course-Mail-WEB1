@@ -106,3 +106,4 @@
 127.0.0.1 - - [20/Jul/2023:19:18:33 +0300] "GET /upload/ HTTP/1.1" 404 1110 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 127.0.0.1 - - [20/Jul/2023:19:18:55 +0300] "GET /uploads/ HTTP/1.1" 403 196 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 127.0.0.1 - - [20/Jul/2023:19:19:06 +0300] "GET /hello/ HTTP/1.1" 200 5 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+10.42.164.45 - - [20/Jul/2023:16:37:22 +0000] "GET / HTTP/1.1" 200 12 "-" "Python-urllib/2.7"
