@@ -18,13 +18,12 @@ from django.contrib import admin
 # from django.urls import include
 import django
 if (django.VERSION[0] > 3):
-  from django.urls import url, re_path
+  from django.urls import re_path, include
+  urlfunc = re_path
 else:
   from django.conf.urls import url, include
+  urlfunc = url
 
 # urlpatterns = [path('admin/', admin.site.urls),]
 # urlpatterns = patterns('ask.qa')
-if (django.VERSION[0] > 3):
-  urlpatterns = [re_path('', include('qa.urls')),]
-else:
-  urlpatterns = [url('', include('qa.urls')),]
+urlpatterns = [urlfunc('', include('qa.urls')),]
