@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div>
+      <form method="post" action="">
+        {% csrf_token %}            
+        {{ form.as_p }}
+        <br /><input class="button" type="submit" value="Задать вопрос" />
+      </form>
+    </div>
+  </body>
+</html>
