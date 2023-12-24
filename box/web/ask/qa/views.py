@@ -1,80 +1,72 @@
-from django.shortcuts import render, get_object_or_404 
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import resolve
-from django.core.paginator import Paginator
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from qa.models import Question, Answer
-from qa.forms import AskForm, AnswerForm
-from django.views.decorators.http import require_GET
+from django.contrib.auth.models import User
+from django.db.models.functions import Now
 
-# paginator.baseurl
+# форма регистрации нового пользователя
+class SignupForm(UserCreationForm):
+  email = forms.EmailField # почта
 
-def application(request, *args, **kwargs):
-    current_url = resolve(request.path_info).url_name
-    # /popular/?page=3 - список популярных вопросов
-    # /?page=2 - главная страница со списком новых вопросов
-    if current_url == 'main' or current_url == 'popular':
-        return page_paginator(request, *args, **kwargs)
-    elif current_url == 'question': # /question/5/ - страница одного вопроса
-        return page_question(request, *args, **kwargs)
-    elif current_url == 'ask': # /ask/ - страница для добавления вопрос
-        return page_ask(request, *args, **kwargs)
-    return HttpResponse('OK')
+  class Meta:
+    model = User
+    fields = ['username', 'email', 'password1', 'password2']
 
 
-def page_ask(request, *args, **kwargs):
-  if request.method == 'GET':
-    form = AskForm()
-  elif request.method == 'POST':
-    form = AskForm(request.POST)
-    if form.is_valid():
-      try:
-        question = form.save()
-        question_url = '/question/' + str(question.id)
-      except ValueError:
-        raise Http404
-      return HttpResponseRedirect(question_url)
-  return render(request, 'ask.html', {
-    'form': form
-  })
+# форма авторизации - встроенная (AuthenticationForm)
 
 
-@require_GET
-def page_paginator(request, *args, **kwargs):
-    current_url = resolve(request.path_info).url_name
-    if current_url == 'main':
-        questions = Question.objects.new()
-    elif current_url == 'popular':
-        questions = Question.objects.popular()
-    try:
-        page = request.GET.get('page', request.GET.get('page', 1))
-    except ValueError:
-        raise Http404
-    paginator = Paginator(questions, 10)
-    if current_url == 'main':
-        paginator.baseurl = '/?page='
-    elif current_url == 'popular':
-        paginator.baseurl = '/popular/?page='
-    page = paginator.page(page)
-    return render(request, 'paginator.html', {
-       'questions': page.object_list,
-       'paginator': paginator, 'page': page,
-    })
+
+# форма добавления вопроса
+class AskForm(forms.Form):
+  title = forms.CharField(max_length=100) # поле заголовка
+  text = forms.CharField(widget=forms.Textarea) # поле текста вопроса
+
+  class Meta:
+    model = Question
+    fields = ['title', 'text']
+
+  def clean_title(self):
+    title = self.cleaned_data['title']
+    if title.isspace():
+      raise forms.ValidationError(u'Заголовок не должен быть пустым', code=1)
+    return title
+
+  def clean_text(self):
+    text = self.cleaned_data['text']
+    if text.isspace():
+      raise forms.ValidationError(u'Текст вопроса не должен быть пустым', code=1)
+    return text
+
+  def save(self):
+    question = Question(title=self.cleaned_data['title'],
+      text=self.cleaned_data['text'],
+      rating=0,
+      author=self.author,
+      added_at=Now())
+    question.save()
+    return question
 
 
-def page_question(request, *args, **kwargs):
-    question = get_object_or_404(Question, pk=kwargs['pk'])
-    answers = Answer.objects.filter(question__pk=kwargs['pk']).all()
-    if request.method == 'GET':
-      form = AnswerForm()
-    elif request.method == 'POST':
-      form = AnswerForm(request.POST)
-      form.question = question
-      if form.is_valid():
-        answer = form.save()
-        current_url = request.path_info
-        return HttpResponseRedirect(current_url)
-    return render(request, 'question.html', {
-        'question': question,
-        'answers': answers,
-        'form': form
-    })
+# форма добавления ответа
+class AnswerForm(forms.Form):
+  text = forms.CharField(widget=forms.Textarea) # поле текста ответа
+  question = 0 # поле для связи с вопросом
+
+  class Meta:
+    model = Answer
+    fields = ['text']
+
+  def clean_text(self):
+    text = self.cleaned_data['text']
+    if text.isspace():
+      raise forms.ValidationError(u'Поля текста вопроса и ответа не должны быть пустыми', code=2)
+    return text
+
+  def save(self):
+    answer = Answer(text=self.cleaned_data['text'],
+      added_at=Now(),
+      author=self.author,
+      question=self.question)
+    answer.save()
+    return answer
